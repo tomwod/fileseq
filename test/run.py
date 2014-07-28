@@ -124,6 +124,19 @@ class TestFramesToFrameRange(unittest.TestCase):
 
 class TestFileSequence(unittest.TestCase):
 
+	def testSecondaryFormat(self):
+		seq = fileseq.FileSequence("/foo/boo_1-5#_exr")
+		self.assertEquals(5, len(seq))
+		self.assertEquals("/foo/", seq.dirname())
+		self.assertEquals("boo_", seq.basename())
+		self.assertEquals("#", seq.padding())
+		self.assertEquals("_exr", seq.extension())
+
+		self.assertEquals("/foo/boo_9999_exr", seq.frame(9999))
+		self.assertEquals("/foo/boo_xxxx_exr", seq.frame("xxxx"))
+		self.assertEquals("/foo/boo_0001_exr", seq[0])
+		self.assertEquals("/foo/boo_0001_exr", seq.index(0))
+
 	def testSeqGettersType1(self):
 		seq = fileseq.FileSequence("/foo/boo.1-5#.exr")
 		self.assertEquals(5, len(seq))

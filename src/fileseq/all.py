@@ -34,8 +34,19 @@ _PATTERNS = [
 Regular expression for matching a file sequence string.
 Example:
     /film/shot/renders/bilbo_bty.1-100#.exr
+
+Regular expression should br grouped by:
+1: directory
+2: basename
+3: frameSet
+4: padding
+5: extension
 """
-_SEQ_PATTERN = re.compile("^(.*/)?(?:$|(.+?)([\:xy\-0-9,]*)([\#\@]*)(?:(\.[^.]*$)|$))")
+_SEQ_PATTERNS = [ 
+    # Parses the standard sequence /foo/bar/bing.1-10#.exr
+    re.compile("^(.*/)?(?:$|(.+?)([\:xy\-0-9,]*)([\#\@]*)(?:([\._]{1}[^.^_]*$)|$))"),
+]
+
 
 """
 Regular expression pattern for matching file names on disk.
@@ -210,20 +221,25 @@ class FileSequence(object):
     FileSequence represents an ordered sequence of files.
     """
     def __init__(self, sequence):
-        m = _SEQ_PATTERN.match(sequence)
-        if not m:
-            raise ParseException("Failed to parse FileSequence: %s" % sequence)
-        self.__dir = m.group(1)
-        if not self.__dir:
-            self.__dir = ""
-        self.__basename = m.group(2)
-        self.__padding = m.group(4)
-        if m.group(3):
-            self.__frameSet = FrameSet(m.group(3))
-        else:
-            self.__frameSet = None
-        self.__ext = m.group(5)
-        self.__zfill = sum([_PADDING[c] for c in self.__padding])
+        for pat in _SEQ_PATTERNS:
+            m = pat.match(sequence)
+            if not m:
+                continue
+
+            self.__dir = m.group(1)
+            if not self.__dir:
+                self.__dir = ""
+            self.__basename = m.group(2)
+            self.__padding = m.group(4)
+            if m.group(3):
+                self.__frameSet = FrameSet(m.group(3))
+            else:
+                self.__frameSet = None
+            self.__ext = m.group(5)
+            self.__zfill = sum([_PADDING[c] for c in self.__padding])
+            return
+
+        raise ParseException("Failed to parse FileSequence: %s" % sequence)
 
     def format(self, template="{basename}{range}{padding}{extension}"):
         """
