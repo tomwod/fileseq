@@ -2,8 +2,8 @@
 """
 constants - General constants of use to fileseq operations.
 """
-
 import re
+import os
 
 PAD_MAP = {"#": 4, "@": 1}
 
@@ -13,7 +13,7 @@ SPLIT_PATTERN = r"([-:,xy\d]*)([{0}]+)".format(''.join(PAD_MAP.keys()))
 SPLIT_RE = re.compile(SPLIT_PATTERN)
 
 # Regular expression pattern for matching file names on disk.
-DISK_PATTERN = r"^(.*/)?(?:$|(.*?)(-?\d+)?(?:(\.[^.]*$)|$))"
+DISK_PATTERN = r"^(.*{sep})?(?:$|(.*?)(-?\d+)?(?:(\.[^.]*$)|$))".format(sep=os.sep.encode('string-escape'))
 DISK_RE = re.compile(DISK_PATTERN)
 
 # Regular expression pattern for matching frame set strings.
